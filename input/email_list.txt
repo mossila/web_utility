@@ -1,0 +1,36 @@
+john.doe@gmail.com	test@mailcom	sarah.smith@example.com
+mary.johnson@yahoo.com  	test@mail .com	michael.brown@outlook.com 	#n/a
+emma.wilson@hotmail.com	test_123@mail_com	david.taylor@company.org
+james.anderson@mail.com 	invalidmail@  	lisa.thomas@domain.co.uk	 	anna.martinez@test.net
+robert.jackson@service.com  test@domaincom	william.white@work.io
+ 	christopher.harris@email.co	#invalid	patricia.martin@site.com
+daniel.thompson@mail.us	test @mail.com	jennifer.garcia@platform.com 	 	matthew.robinson@dev.com
+anthony.clark@net.org	test..email@mail.com	barbara.rodriguez@tools.io 	mark.lewis@app.com
+donald.lee@service.net 	@mail.com	elizabeth.walker@main.com	 	steven.hall@platform.org
+paul.allen@domain.co	test@.com	donna.young@network.io  	kenneth.king@solutions.com
+andrew.wright@company.net	usermail.com	carol.lopez@portal.com 	 	joshua.hill@site.net
+kevin.scott@mail.co	test user@mail.com	sandra.green@connect.com	 	ronald.adams@services.io
+edward.baker@domain.org 	test@mail..com	janet.nelson@hub.com  	kevin.carter@app.net
+timothy.mitchell@service.co	#N/A	kathleen.roberts@cloud.io	 	ryan.phillips@data.com
+jacob.perez@net.io	test@mailcm	shirley.campbell@stream.co 	 	gary.parker@forge.net
+gary.evans@platform.com  	@test	cynthia.parker@connect.io	 	nicholas.evans@build.com
+eric.edwards@mail.net	invalid..email@domain.com	gloria.edwards@tech.org 	jonathan.collins@site.io
+stephen.collins@domain.co	test mail@gmail.com	ann.stewart@platform.net  	justin.sanchez.morris@work.com
+larry.stewart@app.org 	test@mail,com	brenda.morris@network.io	 	scott.rogers@service.net
+justin.sanchez@mail.io	#error	pamela.rogers@main.co 	 	brandon.reed@solutions.com
+samuel.morris@net.com  	test@@mail.com	katherine.cook@portal.org	 	frank.morgan@tools.net
+raymond.rogers@domain.net	a b@mail.com	christine.morgan@hub.io 	alexander.bell@forge.com
+patrick.reed@mail.co	test@domain	deborah.murphy@connect.net  	jack.bailey@cloud.co
+dennis.cook@service.org 	testmailcom	theresa.bailey@stream.io	 	dennis.rivera@app.net
+jerry.morgan@platform.co	t@mail.c	sara.rivera@tech.com 	 	tyler.cooper@site.org
+tyler.bell@net.io  	test@ gmail.com	frances.cooper@platform.io	 	aaron.richardson@build.net
+aaron.murphy@domain.org	test@mail .org	frances.cox@main.com 	 	jose.cox@network.io
+jose.bailey@mail.net 	#invalid#	ruby.cox@portal.net	 	adam.howard@solutions.co
+adam.rivera@service.co	.test@mail.com	diane.howard@tools.com  	henry.ward@forge.io
+henry.cooper@platform.org  	test@-mail.com	elaine.ward@connect.io	 	douglas.torres@site.net
+douglas.richardson@mail.com	test@mail-.com	mae.torres@cloud.net 	 	peter.peterson@app.co
+peter.cox@domain.io 	test@mail@com	virginia.peterson@hub.com	 	zachary.gray@platform.io
+zachary.howard@net.org	spaces in@mail.com	helen.gray@stream.co 	 	kyle.ramirez@service.net
+kyle.ward@mail.co  	test@mail!com	betty.ramirez@tech.io	 	walter.james@forge.com
+walter.torres@service.net 	 	jennifer.james@connect.com	 	harold.watson@main.net
+abc@invalid.co.th 

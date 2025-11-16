@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Email Tools</title>
+    <style>
+        html,body { height:100%; margin:0; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+        .wrap { display:flex; flex-direction:column; gap:8px; height:auto; padding:12px; box-sizing:border-box; }
+        .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .btn { padding:6px 10px; border:1px solid #bbb; background:#f5f5f5; border-radius:4px; cursor:pointer; }
+        .btn:active { transform:translateY(1px); }
+        .status { margin-left:8px; color:#333; font-size:0.95rem; }
+        /* Textarea - reduced size */
+        textarea#emails {
+            width:100%;
+            height:200px;
+            box-sizing:border-box;
+            padding:12px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Segoe UI Mono", "Roboto Mono", monospace;
+            font-size:13px;
+            line-height:1.25;
+            resize:vertical;
+            white-space:pre-wrap;
+            word-wrap:break-word;
+            overflow:auto;
+            background:#fff;
+            border:1px solid #ddd;
+            border-radius:6px;
+        }
+        input[type=file] { display:none; }
+        .hint { color:#666; font-size:0.9rem; }
+        .warning { color:#a33; font-weight:600; margin-left:10px; }
+        /* Invalid emails section */
+        .invalid-section { display:none; margin-top:16px; padding:12px; background:#fff8f8; border:1px solid #ffcccc; border-radius:6px; }
+        .invalid-section.show { display:block; }
+        .invalid-section h3 { margin:0 0 12px 0; color:#c33; font-size:1rem; }
+        .invalid-table { width:100%; border-collapse:collapse; }
+        .invalid-table th { background:#f5f5f5; padding:8px; text-align:left; border-bottom:2px solid #ddd; font-weight:600; font-size:0.9rem; }
+        .invalid-table td { padding:8px; border-bottom:1px solid #eee; font-size:0.9rem; }
+        .invalid-table tr:hover { background:#fff0f0; }
+        .invalid-reason { color:#999; font-size:0.85rem; }
+        .invalid-section .buttons { margin-top:12px; display:flex; gap:8px; }
+        .invalid-section .buttons button { padding:6px 12px; border:1px solid #bbb; background:#f5f5f5; border-radius:4px; cursor:pointer; font-size:0.9rem; }
+        .invalid-section .buttons button:hover { background:#e5e5e5; }
+        /* Chunk section */
+        .chunk-section { display:none; margin-top:16px; padding:12px; background:#f0f8ff; border:1px solid #b3d9ff; border-radius:6px; }
+        .chunk-section.show { display:block; }
+        .chunk-section h3 { margin:0 0 12px 0; color:#0066cc; font-size:1rem; }
+        .chunk-controls { display:flex; gap:8px; margin-bottom:12px; align-items:center; }
+        .chunk-controls input { padding:6px 10px; border:1px solid #bbb; border-radius:4px; font-size:0.9rem; width:120px; }
+        .chunk-controls button { padding:6px 12px; border:1px solid #bbb; background:#f5f5f5; border-radius:4px; cursor:pointer; font-size:0.9rem; }
+        .chunk-controls button:hover { background:#e5e5e5; }
+        .chunk-table { width:100%; border-collapse:collapse; }
+        .chunk-table th { background:#f5f5f5; padding:8px; text-align:left; border-bottom:2px solid #ddd; font-weight:600; font-size:0.9rem; }
+        .chunk-table td { padding:8px; border-bottom:1px solid #eee; font-size:0.9rem; }
+        .chunk-table tr:hover { background:#f0f8ff; }
+        .chunk-table tr.done { background:#d4edda; }
+        .chunk-table tr.pending { background:#fff3cd; }
+        .chunk-email-input { width:100%; padding:4px; border:1px solid #ddd; border-radius:3px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Segoe UI Mono", "Roboto Mono", monospace; font-size:0.9rem; overflow-x:auto; background:#fff; }
+        .chunk-actions { display:flex; gap:4px; flex-wrap:wrap; }
+        .chunk-btn { padding:4px 8px; border:1px solid #bbb; background:#fff; border-radius:3px; cursor:pointer; font-size:0.85rem; }
+        .chunk-btn:hover { background:#e5e5e5; }
+        .chunk-btn.done-btn { color:#155724; border-color:#28a745; }
+        .chunk-btn.pending-btn { color:#856404; border-color:#ffc107; }
+        .chunk-btn.reset-btn { color:#666; border-color:#bbb; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <div>
+                <strong>Paste emails</strong>
+                <div class="hint">Paste emails to format and validate</div>
+            </div>
+            <div class="controls">
+                <button id="format" class="btn">Format data</button>
+                <button id="clear" class="btn">Clear</button>
+                <div id="count" class="status" style="color:#0066cc;">-</div>
+            </div>
+        </div>
+
+        <textarea id="emails" placeholder="Paste emails here (one per line)..." wrap="soft" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+
+        <!-- Chunk section -->
+        <div id="chunkSection" class="chunk-section">
+            <h3>Split into Chunks</h3>
+            <div class="chunk-controls">
+                <input type="number" id="chunkSize" placeholder="Emails per chunk" min="1" value="50" />
+                <button onclick="splitIntoChunks()">Split Chunk</button>
+            </div>
+            <div style="max-height:400px; overflow-y:auto;">
+                <table class="chunk-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">Chunk</th>
+                            <th>Emails</th>
+                            <th style="width:280px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chunkTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Invalid emails section -->
+        <div id="invalidSection" class="invalid-section">
+            <h3>Invalid Emails Found</h3>
+            <div style="max-height:300px; overflow-y:auto;">
+                <table class="invalid-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Invalid Email</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invalidTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="buttons">
+                <button onclick="copyInvalidEmails()">Copy All</button>
+                <button onclick="downloadInvalidEmails()">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Efficient line counting for large text: count newline characters
+        const textarea = document.getElementById('emails');
+        const count = document.getElementById('count');
+        const clearBtn = document.getElementById('clear');
+
+        // Store valid emails globally
+        let currentValidEmails = [];
+
+        function updateStatus() {
+            count.textContent = '-';
+        }
+
+        clearBtn.addEventListener('click', () => {
+            textarea.value = '';
+            updateStatus();
+            textarea.focus();
+            document.getElementById('chunkSection').classList.remove('show');
+            document.getElementById('invalidSection').classList.remove('show');
+            hasActiveChunks = false;
+            currentValidEmails = [];
+        });
+
+        // Format data: validate emails and replace whitespace with semicolon
+        document.getElementById('format').addEventListener('click', () => {
+            // disable format button temporarily and show progress text
+            const formatBtn = document.getElementById('format');
+            formatBtn.disabled = true;
+            const previousText = formatBtn.textContent;
+            formatBtn.textContent = 'Formatting...';
+
+            // Run heavy processing asynchronously so the above DOM update can paint
+            // before the CPU-intensive email parsing/validation runs. This avoids the
+            // UI appearing frozen and ensures the button text changes immediately.
+            setTimeout(() => {
+                const text = textarea.value;
+            if (!text.trim()) {
+                alert('Please paste or load emails first');
+                formatBtn.disabled = false;
+                formatBtn.textContent = previousText;
+                return;
+            }
+
+            // Check if data is already semicolon-separated
+            if (text.includes(';') && !text.match(/[\s\t\n\r]/)) {
+                // Data is already semicolon-separated, skip processing
+                const emails = text.split(';').filter(e => e.length > 0);
+                currentValidEmails = emails;
+                
+                const emailCount = emails.length;
+                count.textContent = 'Valid: ' + emailCount.toLocaleString() + ' email' + (emailCount !== 1 ? 's' : '');
+                
+                document.getElementById('chunkSection').classList.add('show');
+                document.getElementById('invalidSection').classList.remove('show');
+                
+                formatBtn.disabled = false;
+                formatBtn.textContent = previousText;
+                return;
+            }
+
+                // Email validation regex: basic SMTP format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            // Extract all tokens (split by any whitespace)
+            const tokens = text.split(/[\s\t\n\r]+/).filter(token => token.length > 0);
+
+            // Validate and separate
+            const validEmails = [];
+            const invalidEmails = [];
+
+            tokens.forEach(token => {
+                if (emailRegex.test(token)) {
+                    validEmails.push(token);
+                } else {
+                    invalidEmails.push(token);
+                }
+            });
+
+            // Join valid emails with semicolon
+            textarea.value = validEmails.join(';');
+            currentValidEmails = validEmails;
+            updateStatus();
+            
+            // Count valid emails by semicolon
+            const emailCount = validEmails.length;
+            count.textContent = 'Valid: ' + emailCount.toLocaleString() + ' email' + (emailCount !== 1 ? 's' : '');
+            
+            // Show chunk section
+            document.getElementById('chunkSection').classList.add('show');
+
+            // Show invalid emails in section if any
+            if (invalidEmails.length > 0) {
+                displayInvalidEmails(invalidEmails);
+            }
+                // Re-enable format button
+                formatBtn.disabled = false;
+                formatBtn.textContent = previousText;
+            }, 0);
+        });
+
+        // Function to determine invalid reason
+        function getInvalidReason(email) {
+            if (!email.includes('@')) return 'Missing @ symbol';
+            if (email.includes(' ')) return 'Contains spaces';
+            if (email.includes('\t')) return 'Contains tabs';
+            const atIndex = email.indexOf('@');
+            const beforeAt = email.substring(0, atIndex);
+            const afterAt = email.substring(atIndex + 1);
+            if (!beforeAt) return 'Nothing before @';
+            if (!afterAt) return 'Nothing after @';
+            if (!afterAt.includes('.')) return 'Missing dot in domain';
+            if (afterAt.startsWith('.') || afterAt.endsWith('.')) return 'Invalid domain format';
+            if (beforeAt.includes('@')) return 'Multiple @ symbols';
+            if (email.includes('..')) return 'Double dots';
+            return 'Invalid format';
+        }
+
+        // Display invalid emails in section
+        function displayInvalidEmails(invalidEmails) {
+            const tbody = document.getElementById('invalidTableBody');
+            tbody.innerHTML = '';
+
+            invalidEmails.forEach((email, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><code>${email}</code></td>
+                    <td><span class="invalid-reason">${getInvalidReason(email)}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('invalidSection').classList.add('show');
+        }
+
+        // Copy invalid emails to clipboard
+        function copyInvalidEmails() {
+            const tbody = document.getElementById('invalidTableBody');
+            const emails = Array.from(tbody.querySelectorAll('tr')).map(row => row.cells[1].textContent.trim());
+            navigator.clipboard.writeText(emails.join('\n')).then(() => {
+                alert('Invalid emails copied to clipboard');
+            });
+        }
+
+        // Download invalid emails as text file
+        function downloadInvalidEmails() {
+            const tbody = document.getElementById('invalidTableBody');
+            const emails = Array.from(tbody.querySelectorAll('tr')).map(row => row.cells[1].textContent.trim());
+            const blob = new Blob([emails.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invalid_emails.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Split emails into chunks
+        function splitIntoChunks() {
+            const chunkSize = parseInt(document.getElementById('chunkSize').value);
+            if (!chunkSize || chunkSize < 1) {
+                alert('Please enter a valid chunk size');
+                return;
+            }
+
+            if (currentValidEmails.length === 0) {
+                alert('No valid emails to split');
+                return;
+            }
+
+            hasActiveChunks = true;
+
+            const tbody = document.getElementById('chunkTableBody');
+            tbody.innerHTML = '';
+
+            const chunks = [];
+            for (let i = 0; i < currentValidEmails.length; i += chunkSize) {
+                chunks.push(currentValidEmails.slice(i, i + chunkSize));
+            }
+
+            chunks.forEach((chunk, index) => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-chunk-index', index);
+                const chunkText = chunk.join(';');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" class="chunk-email-input" value="${chunkText}" readonly /></td>
+                    <td>
+                        <div class="chunk-actions">
+                            <button class="chunk-btn" onclick="copyChunk(${index}, '${chunkText.replace(/'/g, "\\'")}')">Copy</button>
+                            <button class="chunk-btn done-btn" onclick="setChunkStatus(${index}, 'done')">Done</button>
+                            <button class="chunk-btn pending-btn" onclick="setChunkStatus(${index}, 'pending')">Pending</button>
+                            <button class="chunk-btn reset-btn" onclick="setChunkStatus(${index}, 'reset')">Reset</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Set chunk status (Done, Pending, Reset)
+        function setChunkStatus(index, status) {
+            const row = document.querySelector(`tr[data-chunk-index="${index}"]`);
+            if (!row) return;
+
+            row.classList.remove('done', 'pending');
+            if (status === 'done') {
+                row.classList.add('done');
+            } else if (status === 'pending') {
+                row.classList.add('pending');
+            }
+        }
+
+        // Copy chunk to clipboard
+        function copyChunk(index, chunkText) {
+            navigator.clipboard.writeText(chunkText).then(() => {
+                setChunkStatus(index, 'pending');
+            });
+        }
+
+        // Initialize
+        updateStatus();
+
+        // Prevent page reload while working with chunks
+        let hasActiveChunks = false;
+
+        window.addEventListener('beforeunload', (e) => {
+            if (hasActiveChunks && currentValidEmails.length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+    </script>
+</body>
+</html>
